@@ -1,0 +1,68 @@
+body {
+	margin: 0 30% 20px 30%; /* Đặt lề cho body là 0 ở trên và dưới, 30% ở hai bên */
+	text-align: center; /* Căn giữa văn bản trong body */
+}
+  
+.row {
+	  display: flex; /* Sử dụng Flexbox để bố trí các phần tử con */
+	  flex-direction: row; /* Đặt hướng của các phần tử con theo hàng ngang */
+	  justify-content: space-between; /* Căn đều các phần tử con với khoảng cách giữa chúng */
+}
+  
+.device {
+	  background-color: #00ff3a14; /* Đặt màu nền cho device với màu xanh lá cây nhạt */
+	  border: dashed 1px; /* Đặt viền cho device là đường nét đứt với độ dày 1px */
+	  padding: 10px; /* Đặt khoảng cách giữa nội dung và viền cho device là 10px */
+}
+
+.tenbaikiemtra {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 2px solid #000; /* Đường viền với màu đen và độ dày 2px */
+    padding: 10px; /* Khoảng cách bên trong phần tử */
+    border-radius: 8px; /* Bo tròn góc */
+    margin: 10px 0; /* Khoảng cách trên dưới */
+    background-color: #f9f9f9; /* Màu nền */
+}
+
+.tenbaikiemtra .left,
+.tenbaikiemtra .center,
+.tenbaikiemtra .right {
+    flex: 1;
+    text-align: center;
+    font-size: 20px;
+}
+
+.tenbaikiemtra .left {
+    text-align: left;
+}
+
+.tenbaikiemtra .center {
+    text-align: center;
+}
+
+.tenbaikiemtra .right {
+    text-align: right;
+}
+
+
+
+.thongtin {
+    display: flex; /* Sử dụng Flexbox để bố trí các phần tử con */
+    border: solid 1px; /* Đường viền bao quanh */
+}
+
+.thongtin-sv {
+    width: 50%;
+    background-color: rgb(241, 96, 163);
+    text-align: left;
+    padding: 10px;
+}
+
+.thongtin-cambien {
+    width: 50%;
+    background-color: rgb(236, 141, 52);
+    text-align: right;
+    padding: 10px;
+}

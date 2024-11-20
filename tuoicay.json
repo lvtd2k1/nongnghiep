@@ -1,0 +1,13 @@
+{
+  "temperature": 30.5,
+  "humidity": 65.3,
+  "soil_moisture": 2500,
+  "rain_level": 1800,
+  "Motor": {
+    "P": 1,
+    "K": 0,
+    "N": 1,
+    "W": 0,
+    "A": 1
+  }
+}

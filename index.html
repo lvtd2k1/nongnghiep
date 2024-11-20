@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HỆ THỐNG GIÁM SÁT TƯỚI CÂY NÔNG NGHIỆP</title>
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+  <style>
+    .pump-status {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .pump-status h3 {
+      font-size: 18px;
+      color: #4CAF50;
+    }
+    
+    .pump-status img {
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      display: block;
+    }
+    .data-item {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background-color: #ddd;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-top: 5px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0;
+      transition: width 0.3s ease, background-color 0.3s ease;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+
+    header {
+      background-color: #4CAF50;
+      color: white;
+      text-align: center;
+      padding: 20px 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    header img {
+      width: 60px;
+      height: 60px;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .section {
+      background-color: #f9f9f9;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .section h2 {
+      font-size: 18px;
+      color: #4CAF50;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .data-item {
+      padding: 10px 0;
+      font-size: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .data-item:last-child {
+      border-bottom: none;
+    }
+
+    .progress-bar {
+      width: 80%;
+      height: 8px;
+      background-color: #ddd;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-left: 10px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background-color: #4CAF50;
+      width: 0;
+      transition: width 0.3s ease;
+    }
+
+    .control-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      font-size: 16px;
+      font-weight: bold;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn-on {
+      background-color: #4CAF50;
+    }
+
+    .btn-off {
+      background-color: #f44336;
+    }
+
+    .btn-on:hover {
+      background-color: #45a049;
+    }
+
+    .btn-off:hover {
+      background-color: #e53935;
+    }
+
+    footer {
+      text-align: center;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      margin-top: 20px;
+      box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="https://img.freepik.com/premium-vector/computer-plant-control-icon-outline-computer-plant-control-vector-icon-color-flat-isolated_96318-108128.jpg" alt="Plant Control">
+    <h1>HỆ THỐNG GIÁM SÁT TƯỚI CÂY NÔNG NGHIỆP</h1>
+  </header>
+
+  <main>
+    <!-- Thông tin cảm biến -->
+    <div class="section">
+      <h2>Thông Tin Cảm Biến</h2>
+      <div class="data-item">
+        Độ Ẩm Đất: <span id="soilMoisture">Loading...</span>%
+        <div class="progress-bar">
+          <div id="soilMoistureProgress" class="progress-fill"></div>
+        </div>
+      </div>
+      <div class="data-item">
+        Trạng Thái Độ Ẩm Đất: <span id="soilState">Loading...</span>
+      </div>
+      <div class="data-item">
+        Giá Trị pH: <span id="pValue">Loading...</span>
+        <div class="progress-bar">
+          <div id="pHProgress" class="progress-fill"></div>
+        </div>
+      </div>
+    
+      <div class="data-item">
+        Trạng Thái pH: <span id="pHStatus">Loading...</span>
+      </div>
+    </div>
+
+    <!-- Thông tin môi trường -->
+    <div class="section">
+      <h2>Thông Tin Môi Trường</h2>
+      <div class="data-item">
+        Mức Độ Mưa: <span id="rainLevel">Loading...</span>%
+        <div class="progress-bar">
+          <div id="rainLevelProgress" class="progress-fill"></div>
+        </div>
+      </div>
+      <div class="data-item">
+        Trạng Thái Mưa: <span id="rainState">Loading...</span>
+      </div>
+      <div class="data-item">
+        Nhiệt Độ Không Khí: <span id="temperature">Loading...</span>°C
+      </div>
+      <div class="data-item">
+        Độ Ẩm Không Khí: <span id="humidity">Loading...</span>%
+      </div>
+    </div>
+
+    <!-- Trạng thái hệ thống -->
+    <div class="section">
+      <h2>Trạng Thái Hệ Thống</h2>
+      <div class="data-item">
+        Trạng Thái Bơm: <span id="pumpStatus">Loading...</span>
+      </div>
+      <div class="data-item">
+        Trạng Thái Van: <span id="valveStatus">Loading...</span>
+      </div>
+    </div>
+
+   <!-- Điều khiển -->
+   <div class="section">
+    <h2>Khu vực điều khiển</h2>
+  
+  <!-- Hiển thị trạng thái bơm -->
+  <div class="pump-status">
+    <h3 id="pumpMessage">Trạng thái bơm: Đang tải...</h3>
+    <img id="pumpImage" src="https://cdn-icons-png.flaticon.com/512/3815/3815797.png" alt="Pump Status" style="width: 100px; margin: 10px auto;">
+  </div>
+  
+  <!-- Nút điều khiển -->
+  <center><button class="btn btn-on" onclick="togglePump('on')">TƯỚI CÂY</button>
+  <button class="btn btn-off" onclick="togglePump('off')">DỪNG TƯỚI CÂY</button></center>
+</div>
+
+<script>
+  // Hàm bật/tắt bơm
+  function togglePump(state) {
+    const pumpState = state === 'on' ? 1 : 0;
+    
+    // Cập nhật trạng thái bơm
+    document.getElementById('pumpMessage').textContent = "Trạng thái bơm: " + (state === 'on' ? "Đang hoạt động" : "Đã tắt");
+    
+    // Cập nhật hình ảnh bơm
+    const pumpImage = document.getElementById('pumpImage');
+    if (state === 'on') {
+      pumpMessage.innerText = "Trạng thái bơm: Bơm mở";
+      pumpImage.src = "https://via.placeholder.com/150/00ff00?text=Pump+On"; // Thay link ảnh bơm mở
+    } else {
+      pumpMessage.innerText = "Trạng thái bơm: Bơm tắt";
+      pumpImage.src = "https://via.placeholder.com/150/ff0000?text=Pump+Off"; // Thay link ảnh bơm tắt
+    }
+  
+    
+    // Cập nhật dữ liệu lên Firebase (nếu cần)
+    // database.ref("/Motor/W").set(pumpState);
+  }
+</script>
+    <script>
+      // Dữ liệu giả lập cảm biến
+      const sensorData = {
+        soilMoisture: 45, // Độ ẩm đất (%)
+        pValue: 7.2,      // pH
+        rainLevel: 0,     // Mưa (%)
+      };
+  
+      // Cập nhật giao diện
+      function updateUI() {
+        // Độ ẩm đất
+        const soilMoisture = sensorData.soilMoisture;
+        const soilMoistureElement = document.getElementById("soilMoisture");
+        const soilMoistureProgress = document.getElementById("soilMoistureProgress");
+  
+        soilMoistureElement.textContent = soilMoisture;
+        soilMoistureProgress.style.width = `${soilMoisture}%`;
+        soilMoistureProgress.style.backgroundColor = soilMoisture < 50 ? "red" : "green";
+  
+        // Giá trị pH
+        const pValue = sensorData.pValue;
+        const pValueElement = document.getElementById("pValue");
+        const pHProgress = document.getElementById("pHProgress");
+  
+        pValueElement.textContent = pValue;
+        if (pValue < 6.0) {
+          pHProgress.style.backgroundColor = "red";
+        } else if (pValue > 8.0) {
+          pHProgress.style.backgroundColor = "blue";
+        } else {
+          pHProgress.style.backgroundColor = "green";
+        }
+        pHProgress.style.width = `${(pValue / 14) * 100}%`;
+  
+        // Mức độ mưa
+        const rainLevel = sensorData.rainLevel;
+        const rainLevelElement = document.getElementById("rainLevel");
+        const rainLevelProgress = document.getElementById("rainLevelProgress");
+  
+        rainLevelElement.textContent = rainLevel;
+        rainLevelProgress.style.width = `${rainLevel}%`;
+        rainLevelProgress.style.backgroundColor = rainLevel > 0 ? "red" : "green";
+      }
+  
+      // Gọi hàm để cập nhật giao diện
+      updateUI();
+    </script>
+  </main>
+
+  <script>
+    // Cấu hình Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyDuw3A60M3i92apyozdSWefNXuA54P_org",
+        authDomain: "hethongtuoicay-50417.firebaseapp.com",
+        projectId: "hethongtuoicay-50417",
+        storageBucket: "hethongtuoicay-50417.appspot.com",
+        messagingSenderId: "725493077160",
+        appId: "1:725493077160:web:036abf4d72073755ae5e9d",
+        measurementId: "G-E795LWQPEH"
+      };
+
+    // Khởi tạo Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // Hàm cập nhật giá trị từ Firebase lên giao diện
+    function updateData() {
+      database.ref("/sensor/soilMoisturePercentage").on("value", (snapshot) => {
+        const moistureValue = snapshot.val();
+        document.getElementById("soilMoisture").innerText = moistureValue;
+        document.getElementById("soilMoistureProgress").style.width = moistureValue + "%";
+      });
+
+      // Lấy trạng thái bơm từ Firebase
+database.ref("/actuators/pumpStatus").on("value", (snapshot) => {
+  const pumpStatus = snapshot.val(); // Lấy giá trị trạng thái bơm
+  document.getElementById("pumpStatus").innerText = `Bơm: ${pumpStatus}`; // Hiển thị trạng thái bơm
+});
+
+
+
+ // Lấy trạng thái bơm từ Firebase
+ database.ref("/actuators/pumpStatus").on("value", (snapshot) => {
+  const pumpStatus = snapshot.val(); // Lấy giá trị trạng thái bơm
+  document.getElementById("pumpStatus").innerText = `Bơm: ${pumpStatus}`; // Hiển thị trạng thái bơm
+});
+
+// Lấy trạng thái van từ Firebase
+database.ref("/actuators/valveStatus").on("value", (snapshot) => {
+  const valveStatus  = snapshot.val(); // Lấy giá trị trạng thái van
+  document.getElementById("valveStatus").innerText = `Van: ${valveStatus}`; // Hiển thị trạng thái van
+});
+
+      // Lấy giá trị pH từ Firebase
+database.ref("/sensor/pH").on("value", (snapshot) => {
+  const pHValue = snapshot.val(); // Lấy giá trị pH
+  document.getElementById("pValue").innerText = `pH: ${pHValue.toFixed(2)}`; // Hiển thị giá trị pH với 2 chữ số thập phân
+  document.getElementById("pHValueloading").style.width = `${pHValue * 10}%`; // Cập nhật thanh trạng thái
+});
+
+// Lấy trạng thái pH từ Firebase
+database.ref("/sensor/pHStatus").on("value", (snapshot) => {
+  const pHStatus = snapshot.val(); // Lấy trạng thái pH
+  document.getElementById("pHStatus").innerText = `Trạng thái: ${pHStatus}`; // Hiển thị trạng thái pH
+});
+
+
+      database.ref("/sensor/rainPercentage").on("value", (snapshot) => {
+        const rainValue = snapshot.val();
+        document.getElementById("rainLevel").innerText = rainValue;
+        document.getElementById("rainLevelProgress").style.width = rainValue + "%";
+      });
+
+      database.ref("/sensor/rainStatus").on("value", (snapshot) => {
+        if (snapshot.exists()) {
+          document.getElementById("rainState").innerText = snapshot.val();
+          console.log("Rain state:", snapshot.val());
+        } else {
+          console.error("Rain state not found in database");
+        }
+      });
+
+      database.ref("/sensor/soilMoistureStatus").on("value", (snapshot) => {
+        if (snapshot.exists()) {
+          document.getElementById("soilState").innerText = snapshot.val();
+          console.log("Soil state:", snapshot.val());
+        } else {
+          console.error("Soil state not found in database");
+        }
+      });
+
+      database.ref("/sensor/temperature").on("value", (snapshot) => {
+        const tempValue = snapshot.val();
+        document.getElementById("temperature").innerText = tempValue;
+        document.getElementById("temperatureProgress").style.width = Math.min(tempValue, 50) * 2 + "%"; // Tỉ lệ nhiệt độ
+      });
+
+      database.ref("/sensor/humidity").on("value", (snapshot) => {
+        const humidityValue = snapshot.val();
+        document.getElementById("humidity").innerText = humidityValue;
+        document.getElementById("humidityProgress").style.width = humidityValue + "%";
+      });
+    }
+
+    
+
+    // Gọi hàm để cập nhật dữ liệu
+    updateData();
+  </script>
+</body>
+</html>
+<!-- Thêm vào cuối trang HTML -->
+<footer>
+  &copy; 2024 Hệ Thống Giám Sát Tưới Cây Thông Minh
+</footer>
+  
+  <!-- CSS -->
+  <style>
+    .footer {
+      text-align: center;
+      padding: 10px;
+      background-color: #59a1e3;
+      color: white;
+      margin-top: 20px;
+    }
+  </style>
+  
