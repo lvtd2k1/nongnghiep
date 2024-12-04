@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đăng Nhập Hệ Thống Giám Sát Tưới Cây</title>
+  <link rel="stylesheet" href="file:///C:/Users/Admin/Desktop/doantuoicaytudong/tuoicaytudong/style.css">
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
+</head>
+<body>
+  <header>
+    <img src="https://img.freepik.com/premium-vector/computer-plant-control-icon-outline-computer-plant-control-vector-icon-color-flat-isolated_96318-108128.jpg" alt="Plant Control">
+    <h1>ĐĂNG NHẬP HỆ THỐNG GIÁM SÁT TƯỚI CÂY NÔNG NGHIỆP</h1>
+  </header>
+
+  <main>
+    <div class="login-container">
+      <h2>VUI LÒNG ĐĂNG NHẬP</h2>
+      <form id="loginForm" action="javascript:void(0)">
+        <div class="form-item">
+          <label for="email">Email:</label>
+          <input type="email" id="email" placeholder="Nhập email của bạn" required>
+        </div>
+        <div class="form-item">
+          <label for="password">Mật khẩu:</label>
+          <input type="password" id="password" placeholder="Nhập mật khẩu" required>
+        </div>
+        <button type="submit" id="loginBtn">Đăng Nhập</button>
+      </form>
+
+      <p>Chưa có tài khoản? <a href="javascript:void(0)" id="showRegister"> Hãy Bấm Đăng Ký</a></p>
+    </div>
+
+    <div class="register-container" style="display: none;">
+      <h2>Đăng Ký</h2>
+      <form id="registerForm" action="javascript:void(0)">
+        <div class="form-item">
+          <label for="registerEmail">Email:</label>
+          <input type="email" id="registerEmail" placeholder="Nhập email của bạn" required>
+        </div>
+        <div class="form-item">
+          <label for="registerPassword">Mật khẩu:</label>
+          <input type="password" id="registerPassword" placeholder="Nhập mật khẩu" required>
+        </div>
+        <button type="submit" id="registerBtn">Đăng Ký</button>
+      </form>
+
+      <p>Đã có tài khoản? <a href="javascript:void(0)" id="showLogin">Đăng Nhập</a></p>
+    </div>
+  </main>
+
+  <footer>&copy; 2024 Hệ Thống Giám Sát Tưới Cây Thông Minh</footer>
+
+  <script>
+    // Cấu hình Firebase
+    var firebaseConfig = {
+      apiKey: "AIzaSyDuw3A60M3i92apyozdSWefNXuA54P_org",
+      authDomain: "hethongtuoicay-50417.firebaseapp.com",
+      projectId: "hethongtuoicay-50417",
+      storageBucket: "hethongtuoicay-50417.appspot.com",
+      messagingSenderId: "725493077160",
+      appId: "1:725493077160:web:036abf4d72073755ae5e9d",
+      measurementId: "G-E795LWQPEH"
+    };
+    
+    // Khởi tạo Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    // DOM Elements
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const showRegisterBtn = document.getElementById('showRegister');
+    const showLoginBtn = document.getElementById('showLogin');
+    const loginContainer = document.querySelector('.login-container');
+    const registerContainer = document.querySelector('.register-container');
+    
+    // Đăng nhập
+    loginForm.addEventListener('submit', function(event) {
+      event.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      firebase.auth().signInWithEmailAndPassword(email, password)
+        .then(function(userCredential) {
+          console.log('Đăng nhập thành công!', userCredential.user);
+          window.location.href = 'index.html'; // Chuyển hướng đến trang giám sát nếu đăng nhập thành công
+        })
+        .catch(function(error) {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          alert('Lỗi: ' + errorMessage);
+        });
+    });
+
+    // Đăng ký
+    registerForm.addEventListener('submit', function(event) {
+      event.preventDefault();
+      const email = document.getElementById('registerEmail').value;
+      const password = document.getElementById('registerPassword').value;
+
+      firebase.auth().createUserWithEmailAndPassword(email, password)
+        .then(function(userCredential) {
+          console.log('Đăng ký thành công!', userCredential.user);
+          window.location.href = 'index.html'; // Chuyển hướng đến trang giám sát nếu đăng ký thành công
+        })
+        .catch(function(error) {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          alert('Lỗi: ' + errorMessage);
+        });
+    });
+
+    // Hiển thị form đăng ký
+    showRegisterBtn.addEventListener('click', function() {
+      loginContainer.style.display = 'none';
+      registerContainer.style.display = 'block';
+    });
+
+    // Hiển thị form đăng nhập
+    showLoginBtn.addEventListener('click', function() {
+      loginContainer.style.display = 'block';
+      registerContainer.style.display = 'none';
+    });
+
+
+    
+  </script>
+</body>
+</html>
